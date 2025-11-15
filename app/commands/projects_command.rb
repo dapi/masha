@@ -206,14 +206,19 @@ class ProjectsCommand < BaseCommand
     end
 
     old_slug = project.slug
-    # Use update_columns to bypass FriendlyId which causes name uniqueness validation conflicts
-    if project.update_columns(slug: new_slug)
+
+    # Попытка обновить slug
+    result = project.update(slug: new_slug)
+
+    if result
       session.delete(:current_project_slug)
       text = t('commands.projects.rename.success_slug', old_slug: old_slug, new_slug: new_slug)
       respond_with :message, text: text
       show_project_menu(new_slug)
     else
-      respond_with :message, text: t('commands.projects.rename.error')
+      error_message = project.errors.full_messages.join(', ')
+      error_message = "Неизвестная ошибка (проблема с FriendlyId)" if error_message.blank?
+      respond_with :message, text: t('commands.projects.rename.error_with_reason', reason: error_message)
     end
   end
 

@@ -35,10 +35,18 @@ telegram_inactive:
   created_at: <%= 1.day.ago %>
   updated_at: <%= 1.day.ago %>
 
-# Пользователь с Telegram - владелец тестового проекта (для delete project tests)
-telegram_test_project:
+# Пользователь с Telegram - участник тестового проекта (для attach/edit tests)
+telegram_test:
   user: user_with_telegram
   project: test_project
+  role_cd: 2
+  created_at: <%= 1.day.ago %>
+  updated_at: <%= 1.day.ago %>
+
+# Пользователь с Telegram - владелец dev проекта (для delete project tests)
+telegram_test_project:
+  user: user_with_telegram
+  project: dev_project
   role_cd: 0
   created_at: <%= 1.day.ago %>
   updated_at: <%= 1.day.ago %>
