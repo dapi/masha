@@ -408,3 +408,4 @@ return
 return respond_with :message, text: t('commands.notify.cancelled')
 ```
 - Отвечай только на РУССКОМ языке
+- Все команды make запускай через `direnv exec .`, например: `direnv exec . make deploy`

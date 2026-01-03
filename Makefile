@@ -131,10 +131,10 @@ preview-release:
 
 # Docker и Deploy цели
 
-# Проверка существования git tag (ищем без префикса 'v' так как в masha теги без префикса)
+# Проверка существования git tag (ищем v$(TAG) так как теги с префиксом v)
 guard-tag-exists:
-	@git rev-parse "$(TAG)" >/dev/null 2>&1 || \
-		(echo "Error: Tag '$(TAG)' does not exist in git" && exit 1)
+	@git rev-parse "v$(TAG)" >/dev/null 2>&1 || \
+		(echo "Error: Tag 'v$(TAG)' does not exist in git" && exit 1)
 
 docker-build: ## Build Docker image with version tags
 	@echo "Building Docker image..."
