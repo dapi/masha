@@ -4,7 +4,7 @@ STAGE ?= production
 # Версия из последнего git tag без префикса 'v' (для Docker образов)
 TAG ?= $(shell git describe --tags --abbrev=0 | sed 's/^v//')
 # Registry from environment variable (required)
-REGISTRY ?= $(REGISTRY)
+REGISTRY ?= ghcr.io/dapi
 
 # Default target
 release: patch-release
