@@ -23,8 +23,8 @@ module Telegram
       Rails.logger.error message_or_error.backtrace.join("\n") if message_or_error.is_a?(Exception)
 
       Bugsnag.notify(message_or_error) do |b|
-        # Use @current_user to avoid re-triggering the error if current_user creation failed
-        b.user = @current_user if defined?(@current_user) && @current_user
+        # Use @current_user directly to avoid re-triggering error if current_user creation failed
+        b.user = @current_user
         b.meta_data = payload if defined?(payload)
         yield b if block_given?
       end
@@ -45,10 +45,8 @@ module Telegram
       notify_bugsnag(exception) do |report|
         report.add_metadata(:telegram, {
                               from: "#{self.class.name}##{caller_locations(1, 1).first.label}",
-                              # Use @current_user to avoid re-triggering the error if current_user creation failed
-                              user: (defined?(@current_user) && @current_user&.id),
-                              # chat is a Hash, use [] instead of .id method
-                              chat_id: chat&.dig('id')
+                              user: @current_user&.id,
+                              chat_id: chat&.dig('id') # chat is a Hash, not an object
                             })
       end
 
