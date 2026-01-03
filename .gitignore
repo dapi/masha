@@ -55,3 +55,4 @@ node_modules/
 .claude-swarm/
 claude-swarm.log
 *.backup*
+.claude/settings.local.json
