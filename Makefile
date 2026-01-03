@@ -1,5 +1,10 @@
 SEMVER_BIN=./bin/semver
 SEMVER=`${SEMVER_BIN}`
+STAGE ?= production
+# Версия из последнего git tag без префикса 'v' (для Docker образов)
+TAG ?= $(shell git describe --tags --abbrev=0 | sed 's/^v//')
+# Registry from environment variable (required)
+REGISTRY ?= $(REGISTRY)
 
 # Default target
 release: patch-release
@@ -123,4 +128,44 @@ preview-release:
 	@echo "Предпросмотр релиза для текущей версии (${SEMVER}):"
 	@echo "=========================================="
 	@./bin/generate_smart_changelog.sh ${SEMVER} | head -n -1
+
+# Docker и Deploy цели
+
+# Проверка существования git tag (ищем без префикса 'v' так как в masha теги без префикса)
+guard-tag-exists:
+	@git rev-parse "$(TAG)" >/dev/null 2>&1 || \
+		(echo "Error: Tag '$(TAG)' does not exist in git" && exit 1)
+
+docker-build: ## Build Docker image with version tags
+	@echo "Building Docker image..."
+	@VERSION=$$(${SEMVER_BIN}); \
+	VERSION=$${VERSION#v}; \
+	docker build \
+		--build-arg VERSION=$$VERSION \
+		--build-arg BUILD_DATE=$$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+		--build-arg GIT_SHA=$$(git rev-parse HEAD) \
+		-t masha:dev -t masha:$$VERSION \
+		-t $(REGISTRY)/masha:latest -t $(REGISTRY)/masha:$$VERSION .; \
+	echo "✓ Docker image built: masha:dev, masha:$$VERSION, $(REGISTRY)/masha:latest, $(REGISTRY)/masha:$$VERSION"
+
+docker-push: ## Push Docker image to registry
+	@echo "Pushing Docker image to $(REGISTRY)..."
+	@VERSION=$$(${SEMVER_BIN}); \
+	VERSION=$${VERSION#v}; \
+	docker push $(REGISTRY)/masha:latest && \
+	docker push $(REGISTRY)/masha:$$VERSION; \
+	echo "✓ Docker images pushed: $(REGISTRY)/masha:latest, $(REGISTRY)/masha:$$VERSION"
+
+build-and-push: docker-build docker-push ## Build and push Docker image
+	@echo "✓ Build and push completed!"
+
+deploy: guard-tag-exists ## Deploy to Kubernetes
+	@test -n "$(INFRA_DIR)" || (echo "Error: INFRA_DIR is not set" && exit 1)
+	@test -n "$(STAGE)" || (echo "Error: STAGE is not set" && exit 1)
+	@echo "Deploying masha $(TAG) to $(STAGE)..."
+	cd $(INFRA_DIR) && direnv exec . $(MAKE) app-deploy APP=masha STAGE=$(STAGE) TAG=$(TAG)
+	@echo ""
+	@echo "✓ Deploy completed!"
+	@echo "  Image: $(REGISTRY)/masha:$(TAG)"
+	@echo "  Stage: $(STAGE)"
 
