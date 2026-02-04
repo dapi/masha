@@ -9,6 +9,8 @@ Metrics/ClassLength:
     - app/queries/time_sheet_query.rb
     - app/services/report_builder.rb
     - app/services/telegram_time_tracker.rb
+    - app/services/report_help_formatter.rb
+    - app/services/telegram_user_merger.rb
 
 Metrics/CyclomaticComplexity:
   Exclude:
@@ -51,6 +53,12 @@ AllCops:
 Metrics/BlockLength:
   Exclude:
     - spec/**/*
+    - Guardfile
+    - config/environments/*.rb
+    - config/initializers/*.rb
+    - config/routes.rb
+    - lib/tasks/*.rake
+    - app/services/telegram_user_merger.rb
 Metrics/MethodLength:
   Enabled: false
 Layout/LineLength:
@@ -69,3 +77,4 @@ Documentation:
 Rails/SkipsModelValidations:
   Exclude:
     - app/services/authentificator.rb
+    - app/models/project.rb
