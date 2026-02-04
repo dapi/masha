@@ -8,6 +8,17 @@
 
 ### 🎯 Основные изменения с версии v0.18.0
 
+#### 🐛 Исправления
+🐛 show error instead of silent fallback for invalid /report args (#354)
+---
+🤖 *Changelog сгенерирован автоматически для MashTime Bot*
+
+
+
+## Что нового в v0.19.0
+
+### 🎯 Основные изменения с версии v0.18.0
+
 ---
 🤖 *Changelog сгенерирован автоматически для MashTime Bot*
 
