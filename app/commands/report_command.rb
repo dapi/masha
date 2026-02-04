@@ -11,8 +11,8 @@
 #   /report 2025-01-01:2025-01-31 detailed     # Date range, detailed
 class ReportCommand < BaseCommand
   def call(*args)
-    # Check for help request
-    return show_help if args.first == 'help'
+    # Check for help request or no arguments
+    return show_help if args.empty? || args.first == 'help'
 
     # Parse command parameters
     params = parse_params(args)
