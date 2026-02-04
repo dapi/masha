@@ -61,12 +61,45 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
         end
 
         context 'with invalid periods' do
-          it 'falls back to today for invalid period' do
-            expect { dispatch_command :report, 'invalid_period' }.not_to raise_error
+          it 'shows error for unrecognized period' do
+            response = dispatch_command :report, 'invalid_period'
+            first_message = response.first
+            expect(first_message[:text]).to include(I18n.t('telegram.commands.report.errors.title'))
+            expect(first_message[:text]).to include('invalid_period')
           end
 
-          it 'falls back to today for malformed date' do
-            expect { dispatch_command :report, '2025-99-99' }.not_to raise_error
+          it 'shows error for invalid date (e.g. November 31)' do
+            response = dispatch_command :report, '2025-11-31'
+            first_message = response.first
+            expect(first_message[:text]).to include(I18n.t('telegram.commands.report.errors.title'))
+            expect(first_message[:text]).to include('2025-11-31')
+          end
+
+          it 'shows error for invalid date range with non-existent date' do
+            response = dispatch_command :report, '2025-11-01:2025-11-31'
+            first_message = response.first
+            expect(first_message[:text]).to include(I18n.t('telegram.commands.report.errors.title'))
+            expect(first_message[:text]).to include('2025-11-31')
+          end
+
+          it 'shows error when start date is after end date' do
+            response = dispatch_command :report, '2025-01-31:2025-01-01'
+            first_message = response.first
+            expect(first_message[:text]).to include(I18n.t('telegram.commands.report.errors.title'))
+          end
+
+          it 'includes help keyboard in error response' do
+            response = dispatch_command :report, 'invalid_period'
+            first_message = response.first
+            expect(first_message[:reply_markup]).not_to be_nil
+            expect(first_message[:reply_markup][:inline_keyboard]).not_to be_empty
+          end
+
+          it 'shows error for cyrillic period names' do
+            response = dispatch_command :report, 'вчера'
+            first_message = response.first
+            expect(first_message[:text]).to include(I18n.t('telegram.commands.report.errors.title'))
+            expect(first_message[:text]).to include('вчера')
           end
         end
       end

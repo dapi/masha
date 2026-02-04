@@ -181,23 +181,19 @@ RSpec.describe ReportBuilder do
     end
 
     describe 'edge cases and error handling' do
-      it 'falls back to today for invalid date string' do
+      it 'raises InvalidPeriodError for invalid date string' do
         builder = ReportBuilder.new(user: user, period: 'invalid-date')
-        result = builder.build
 
-        expect(result[:period][:from]).to eq(Date.new(2025, 1, 15))
-        expect(result[:period][:to]).to eq(Date.new(2025, 1, 15))
+        expect { builder.build }.to raise_error(InvalidPeriodError)
       end
 
-      it 'falls back to today for malformed date range' do
+      it 'raises InvalidPeriodError for malformed date range' do
         builder = ReportBuilder.new(user: user, period: '2025-01-01:invalid')
-        result = builder.build
 
-        expect(result[:period][:from]).to eq(Date.new(2025, 1, 15))
-        expect(result[:period][:to]).to eq(Date.new(2025, 1, 15))
+        expect { builder.build }.to raise_error(InvalidPeriodError)
       end
 
-      it 'falls back to today for unknown period type' do
+      it 'falls back to today for unknown period type (symbol)' do
         builder = ReportBuilder.new(user: user, period: :unknown_period)
         result = builder.build
 
@@ -205,12 +201,10 @@ RSpec.describe ReportBuilder do
         expect(result[:period][:to]).to eq(Date.new(2025, 1, 15))
       end
 
-      it 'handles invalid date in YYYY-MM-DD format' do
+      it 'raises InvalidPeriodError for invalid date in YYYY-MM-DD format' do
         builder = ReportBuilder.new(user: user, period: '2025-13-45')
-        result = builder.build
 
-        expect(result[:period][:from]).to eq(Date.new(2025, 1, 15))
-        expect(result[:period][:to]).to eq(Date.new(2025, 1, 15))
+        expect { builder.build }.to raise_error(InvalidPeriodError)
       end
 
       it 'handles nil period' do
@@ -219,6 +213,18 @@ RSpec.describe ReportBuilder do
 
         expect(result[:period][:from]).to eq(Date.new(2025, 1, 15))
         expect(result[:period][:to]).to eq(Date.new(2025, 1, 15))
+      end
+
+      it 'raises InvalidPeriodError for November 31st (non-existent date)' do
+        builder = ReportBuilder.new(user: user, period: '2025-11-31')
+
+        expect { builder.build }.to raise_error(InvalidPeriodError)
+      end
+
+      it 'raises InvalidPeriodError for date range with non-existent end date' do
+        builder = ReportBuilder.new(user: user, period: '2025-11-01:2025-11-31')
+
+        expect { builder.build }.to raise_error(InvalidPeriodError)
       end
     end
   end

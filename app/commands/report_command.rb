@@ -31,6 +31,8 @@ class ReportCommand < BaseCommand
 
     # Send response
     respond_with :message, text: code(text), parse_mode: :Markdown
+  rescue InvalidPeriodError => e
+    show_error_with_help(e)
   end
 
   private
@@ -86,15 +88,54 @@ class ReportCommand < BaseCommand
     when 'quarter'
       :quarter
     when /^\d{4}-\d{2}-\d{2}$/
-      # Single date format YYYY-MM-DD
+      # Single date format YYYY-MM-DD - validate date
+      validate_date!(text)
       text
     when /^\d{4}-\d{2}-\d{2}:\d{4}-\d{2}-\d{2}$/
-      # Date range format YYYY-MM-DD:YYYY-MM-DD
+      # Date range format YYYY-MM-DD:YYYY-MM-DD - validate dates
+      validate_date_range!(text)
       text
     else
-      # Fallback to today for invalid input
-      :today
+      raise InvalidPeriodError.new(
+        I18n.t('telegram.commands.report.errors.unrecognized_period', period: text),
+        period_string: text
+      )
     end
+  end
+
+  def validate_date!(date_string)
+    Date.parse(date_string)
+  rescue Date::Error
+    raise InvalidPeriodError.new(
+      I18n.t('telegram.commands.report.errors.invalid_date', date: date_string),
+      period_string: date_string
+    )
+  end
+
+  def validate_date_range!(range_string)
+    start_date_str, end_date_str = range_string.split(':')
+    begin
+      start_date = Date.parse(start_date_str)
+    rescue Date::Error
+      raise InvalidPeriodError.new(
+        I18n.t('telegram.commands.report.errors.invalid_date', date: start_date_str),
+        period_string: range_string
+      )
+    end
+    begin
+      end_date = Date.parse(end_date_str)
+    rescue Date::Error
+      raise InvalidPeriodError.new(
+        I18n.t('telegram.commands.report.errors.invalid_date', date: end_date_str),
+        period_string: range_string
+      )
+    end
+    return unless start_date > end_date
+
+    raise InvalidPeriodError.new(
+      I18n.t('telegram.commands.report.errors.start_after_end'),
+      period_string: range_string
+    )
   end
 
   def show_help
@@ -104,6 +145,16 @@ class ReportCommand < BaseCommand
 
     respond_with :message,
                  text: text,
+                 reply_markup: keyboard
+  end
+
+  def show_error_with_help(error)
+    help_formatter = ReportHelpFormatter.new
+    error_text = "#{I18n.t('telegram.commands.report.errors.title')}\n#{error.message}\n\n#{help_formatter.main_help}"
+    keyboard = help_formatter.main_keyboard
+
+    respond_with :message,
+                 text: error_text,
                  reply_markup: keyboard
   end
 
