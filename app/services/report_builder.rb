@@ -57,12 +57,16 @@ class ReportBuilder
       start_date, end_date = period_string.split(':').map { |d| Date.parse(d) }
       { from: start_date, to: end_date }
     else
-      # По умолчанию today
-      { from: Date.current, to: Date.current }
+      raise InvalidPeriodError.new(
+        I18n.t('telegram.commands.report.errors.unrecognized_period', period: period_string),
+        period_string: period_string
+      )
     end
   rescue Date::Error
-    # В случае ошибки парсинга возвращаем today
-    { from: Date.current, to: Date.current }
+    raise InvalidPeriodError.new(
+      I18n.t('telegram.commands.report.errors.invalid_date', date: period_string),
+      period_string: period_string
+    )
   end
 
   def base_scope
