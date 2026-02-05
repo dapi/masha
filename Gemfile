@@ -191,7 +191,7 @@ end
 
 gem 'bugsnag', '~> 6.28'
 
-gem 'bootsnap', '~> 1.18'
+gem 'bootsnap', '~> 1.19'
 
 gem 'csv', '~> 3.3'
 
