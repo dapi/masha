@@ -6,7 +6,7 @@ class ProjectsCommand < BaseCommand
     :awaiting_rename_title,
     :awaiting_rename_slug,
     :awaiting_rename_both,
-    :awaiting_rename_both_step_2,
+    :awaiting_rename_both_step_two,
     :awaiting_client_name,
     :awaiting_client_delete_confirm,
     :awaiting_delete_confirm
@@ -17,7 +17,7 @@ class ProjectsCommand < BaseCommand
   CONTEXT_AWAITING_RENAME_TITLE = :awaiting_rename_title
   CONTEXT_AWAITING_RENAME_SLUG = :awaiting_rename_slug
   CONTEXT_AWAITING_RENAME_BOTH = :awaiting_rename_both
-  CONTEXT_AWAITING_RENAME_BOTH_STEP_2 = :awaiting_rename_both_step_2
+  CONTEXT_AWAITING_RENAME_BOTH_STEP_TWO = :awaiting_rename_both_step_two
   CONTEXT_AWAITING_CLIENT_NAME = :awaiting_client_name
   CONTEXT_AWAITING_CLIENT_DELETE_CONFIRM = :awaiting_client_delete_confirm
   CONTEXT_AWAITING_DELETE_CONFIRM = :awaiting_delete_confirm
@@ -180,14 +180,15 @@ class ProjectsCommand < BaseCommand
     return show_projects_list unless project
 
     old_name = project.name
-    if project.update(name: new_title)
-      session.delete(:current_project_slug)
-      text = t('commands.projects.rename.success_title', old_name: old_name, new_name: new_title)
-      respond_with :message, text: text
-      show_project_menu(current_slug)
-    else
-      respond_with :message, text: t('commands.projects.rename.error')
-    end
+    text = if project.update(name: new_title)
+             t('commands.projects.rename.success_title', old_name: old_name, new_name: new_title)
+           else
+             t('commands.projects.rename.error')
+           end
+
+    session.delete(:current_project_slug)
+    respond_with :message, text: text
+    show_project_menu(current_slug)
   end
 
   def awaiting_rename_slug(*slug_parts)
@@ -206,19 +207,18 @@ class ProjectsCommand < BaseCommand
     end
 
     old_slug = project.slug
-
-    # Попытка обновить slug
     result = project.update(slug: new_slug)
+    session.delete(:current_project_slug)
 
     if result
-      session.delete(:current_project_slug)
       text = t('commands.projects.rename.success_slug', old_slug: old_slug, new_slug: new_slug)
       respond_with :message, text: text
       show_project_menu(new_slug)
     else
       error_message = project.errors.full_messages.join(', ')
-      error_message = "Неизвестная ошибка (проблема с FriendlyId)" if error_message.blank?
+      error_message = t('commands.projects.rename.error_unknown') if error_message.blank?
       respond_with :message, text: t('commands.projects.rename.error_with_reason', reason: error_message)
+      show_project_menu(old_slug)
     end
   end
 
@@ -238,11 +238,11 @@ class ProjectsCommand < BaseCommand
     suggested_slug = Project.generate_unique_slug(new_title)
     session[:suggested_slug] = suggested_slug
 
-    save_context(CONTEXT_AWAITING_RENAME_BOTH_STEP_2)
+    save_context(CONTEXT_AWAITING_RENAME_BOTH_STEP_TWO)
 
     text = t('commands.projects.rename.enter_slug',
              current_slug: current_slug)
-    text += "\nПредложенный (на основе названия): #{suggested_slug}\n\n⚠️ Нажмите кнопку ниже или введите свой вариант"
+    text += t('commands.projects.rename.suggested_slug_hint', slug: suggested_slug)
 
     buttons = [
       [{ text: t('commands.projects.rename.use_suggested'),
@@ -253,7 +253,7 @@ class ProjectsCommand < BaseCommand
                            reply_markup: { inline_keyboard: buttons }
   end
 
-  def awaiting_rename_both_step_2(*slug_parts)
+  def awaiting_rename_both_step_two(*slug_parts)
     new_slug = slug_parts.join(' ').strip
     return handle_cancel_input :rename_both if cancel_input?(new_slug)
 
@@ -289,14 +289,15 @@ class ProjectsCommand < BaseCommand
     end
 
     old_client = project.client&.name || t('commands.projects.menu.no_client')
-    if project.update(client: client)
-      session.delete(:current_project_slug)
-      text = t('commands.projects.client.success', old_client: old_client, new_client: client_name)
-      respond_with :message, text: text
-      show_client_menu(current_slug)
-    else
-      respond_with :message, text: t('commands.projects.client.error')
-    end
+    text = if project.update(client: client)
+             t('commands.projects.client.success', old_client: old_client, new_client: client_name)
+           else
+             t('commands.projects.client.error')
+           end
+
+    session.delete(:current_project_slug)
+    respond_with :message, text: text
+    show_client_menu(current_slug)
   end
 
   def awaiting_client_delete_confirm(*parts)
@@ -308,13 +309,15 @@ class ProjectsCommand < BaseCommand
     project = current_user.projects.find_by(slug: current_slug)
     return show_projects_list unless project
 
-    if project.update(client: nil)
-      session.delete(:current_project_slug)
-      respond_with :message, text: t('commands.projects.client.delete_success')
-      show_client_menu(current_slug)
-    else
-      respond_with :message, text: t('commands.projects.client.error')
-    end
+    text = if project.update(client: nil)
+             t('commands.projects.client.delete_success')
+           else
+             t('commands.projects.client.error')
+           end
+
+    session.delete(:current_project_slug)
+    respond_with :message, text: text
+    show_client_menu(current_slug)
   end
 
   def awaiting_delete_confirm(*parts)
