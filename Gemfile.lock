@@ -622,7 +622,7 @@ GEM
       ffi (~> 1.12)
       logger
     ruby2_keywords (0.0.5)
-    rubyzip (2.4.1)
+    rubyzip (3.2.2)
     russian (0.6.0)
       i18n (>= 0.5.0)
     sawyer (0.9.3)
