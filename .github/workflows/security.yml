@@ -57,7 +57,7 @@ jobs:
     if: github.event_name == 'pull_request'
     steps:
     - name: Check for Dependabot alerts
-      uses: github/dependabot-action@v1
+      uses: github/dependabot-action@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
         skip-condition: "false"
