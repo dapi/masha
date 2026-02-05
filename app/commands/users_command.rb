@@ -22,7 +22,7 @@ class UsersCommand < BaseCommand
 
   def show_project_users
     if current_user.nil?
-      respond_with :message, text: 'Сначала авторизуйтесь через /start'
+      respond_with :message, text: t('errors.auth_required')
       return
     end
 
@@ -57,7 +57,7 @@ class UsersCommand < BaseCommand
 
   def users_add(project_slug = nil, username = nil, role = 'member', *)
     if current_user.nil?
-      respond_with :message, text: 'Сначала авторизуйтесь через /start'
+      respond_with :message, text: t('errors.auth_required')
       return
     end
 
@@ -157,6 +157,11 @@ class UsersCommand < BaseCommand
   end
 
   def users_add_project_callback_query(project_slug)
+    if current_user.nil?
+      edit_message :text, text: t('errors.auth_required')
+      return safe_answer_callback_query('❌ Требуется авторизация', show_alert: true)
+    end
+
     project = find_project(project_slug)
     unless project
       edit_message :text, text: 'Проект не найден'
@@ -179,6 +184,11 @@ class UsersCommand < BaseCommand
   end
 
   def users_add_role_callback_query(role)
+    if current_user.nil?
+      edit_message :text, text: t('errors.auth_required')
+      return safe_answer_callback_query('❌ Требуется авторизация', show_alert: true)
+    end
+
     safe_answer_callback_query('✅ Роль выбрана')
 
     data = telegram_session_data
@@ -194,6 +204,11 @@ class UsersCommand < BaseCommand
   end
 
   def users_list_project_callback_query(project_slug)
+    if current_user.nil?
+      edit_message :text, text: t('errors.auth_required')
+      return safe_answer_callback_query('❌ Требуется авторизация', show_alert: true)
+    end
+
     project = find_project(project_slug)
     if project
       show_users_for_project(project)

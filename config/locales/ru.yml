@@ -67,6 +67,7 @@ ru:
   telegram:
     errors:
       developer_access_denied: "🚫 Доступ запрещён. Команда доступна только разработчику."
+      auth_required: "Сначала авторизуйтесь через /start"
     commands:
       error_occurred: "❌ Произошла ошибка. Мы уже работаем над её устранением."
       descriptions:
