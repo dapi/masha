@@ -628,7 +628,7 @@ GEM
     sawyer (0.9.3)
       addressable (>= 2.3.5)
       faraday (>= 0.17.3, < 3)
-    sdoc (2.6.1)
+    sdoc (2.6.5)
       rdoc (>= 5.0)
     securerandom (0.4.1)
     shellany (0.0.1)
