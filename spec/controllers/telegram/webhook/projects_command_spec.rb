@@ -52,7 +52,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
       end.to change(Project, :count).by(1)
 
       project = Project.last
-      expect(project.name).to eq('newproject')
+      expect(project.title).to eq('newproject')
       expect(project.slug).to eq('newproject')
       expect(project.users).to include(user)
       expect(user.memberships.where(project: project, role_cd: 0)).to exist
@@ -83,7 +83,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
 
       # 3. Verify project was created with correct attributes
       project = Project.last
-      expect(project.name).to eq('My Awesome')
+      expect(project.title).to eq('My Awesome')
       # Slug is auto-generated from name using Russian.translit
       expect(project.slug).to eq('my-awesome')
       expect(project.users).to include(user)
@@ -103,7 +103,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
       end.not_to change(Project, :count)
 
       # 3. Verify no project was created
-      expect(Project.where(name: '')).not_to exist
+      expect(Project.where(title: '')).not_to exist
     end
 
     it 'rejects empty project slug directly' do
@@ -125,7 +125,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
 
       # 3. Verify project was created with auto-generated slug
       project = Project.last
-      expect(project.name).to eq('Project@Name')
+      expect(project.title).to eq('Project@Name')
       # Slug is auto-generated and sanitized
       expect(project.slug).to match(/^[a-z0-9-]+$/)
     end
@@ -153,7 +153,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
 
       # 3. Verify new project was created with unique slug
       new_project = Project.last
-      expect(new_project.name).to eq('New Work Project')
+      expect(new_project.title).to eq('New Work Project')
       # Slug is auto-generated (may be truncated to 15 chars) and will be different from work_project
       expect(new_project.slug).to match(/^new-work-proj/)
       expect(new_project.slug).not_to eq(existing_project.slug)
@@ -224,7 +224,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
         old_slug = project.slug
         expect do
           dispatch_message('New Project Title')
-        end.to change { project.reload.name }.to('New Project Title')
+        end.to change { project.reload.title }.to('New Project Title')
 
         # Verify slug didn't change
         expect(project.slug).to eq(old_slug)
@@ -250,13 +250,13 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
                  })
 
         # 3. User enters new slug
-        old_name = project.name
+        old_title = project.title
         expect do
           dispatch_message('new-slug')
         end.to change { project.reload.slug }.to('new-slug')
 
-        # Verify name didn't change
-        expect(project.name).to eq(old_name)
+        # Verify title didn't change
+        expect(project.title).to eq(old_title)
       end
     end
 
@@ -285,7 +285,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
         # 4. User enters new slug
         expect do
           dispatch_message('new-slug')
-        end.to change { project.reload.name }.to('New Title')
+        end.to change { project.reload.title }.to('New Title')
           .and change { project.slug }.to('new-slug')
       end
 
@@ -324,7 +324,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
                      data: suggested_button[:callback_data]
                    })
         end.to change { project.reload.slug }.from(old_slug)
-          .and change { project.name }.to('My Awesome Project')
+          .and change { project.title }.to('My Awesome Project')
       end
     end
   end
@@ -413,7 +413,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
     end
 
     it 'deletes project through workflow' do
-      project_name = project.name
+      project_title = project.title
 
       # 1. User clicks on project menu
       dispatch(callback_query: {
@@ -439,9 +439,9 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
                  data: "projects_delete_confirm:#{project.slug}"
                })
 
-      # 4. User enters project name to confirm deletion
+      # 4. User enters project title to confirm deletion
       expect do
-        dispatch_message(project_name)
+        dispatch_message(project_title)
       end.to change(Project, :count).by(-1)
 
       # Verify project was deleted
@@ -449,7 +449,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
     end
 
     it 'cancels deletion on wrong name' do
-      project_name = project.name
+      project_title = project.title
 
       # 1. User clicks on project menu
       dispatch(callback_query: {

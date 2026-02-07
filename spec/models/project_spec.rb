@@ -8,7 +8,7 @@ RSpec.describe Project, type: :model do
   it { should be_valid }
 
   describe 'validations' do
-    it { should validate_presence_of(:name) }
+    it { should validate_presence_of(:title) }
 
     context 'slug validation' do
       it { should validate_uniqueness_of(:slug) }

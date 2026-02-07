@@ -42,10 +42,8 @@ class ProjectsCommand < BaseCommand
   end
 
   def projects_select_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_select_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_select) unless data
+
     show_project_menu(data)
   end
 
@@ -54,92 +52,70 @@ class ProjectsCommand < BaseCommand
   end
 
   def projects_rename_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_rename_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_rename) unless data
+
     show_rename_menu(data)
   end
 
   def projects_rename_title_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_rename_title_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_rename_title) unless data
+
     start_rename_title(data)
   end
 
   def projects_rename_slug_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_rename_slug_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_rename_slug) unless data
+
     start_rename_slug(data)
   end
 
   def projects_rename_both_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_rename_both_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_rename_both) unless data
+
     start_rename_both(data)
   end
 
   def projects_rename_use_suggested_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_rename_use_suggested_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_rename_use_suggested) unless data
+
     # Получаем suggested_slug из session, data содержит только slug
     suggested_slug = session[:suggested_slug]
     use_suggested_slug(data, suggested_slug)
   end
 
   def projects_client_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_client_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_client) unless data
+
     show_client_menu(data)
   end
 
   def projects_client_edit_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_client_edit_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_client_edit) unless data
+
     start_client_edit(data)
   end
 
   def projects_client_delete_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_client_delete_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_client_delete) unless data
+
     confirm_client_deletion(data)
   end
 
   def projects_client_delete_confirm_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_client_delete_confirm_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_client_delete_confirm) unless data
+
     delete_client(data)
   end
 
   def projects_delete_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_delete_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_delete) unless data
+
     confirm_project_deletion(data)
   end
 
   def projects_delete_confirm_callback_query(data = nil)
-    unless data
-      Bugsnag.notify(RuntimeError.new('projects_delete_confirm_callback_query called without data'))
-      return respond_with :message, text: 'Что-то странное..'
-    end
+    return handle_missing_callback_data(:projects_delete_confirm) unless data
+
     request_deletion_confirmation(data)
   end
 
@@ -160,10 +136,10 @@ class ProjectsCommand < BaseCommand
                           text: t('commands.projects.create.error', reason: 'Не удалось сгенерировать уникальный идентификатор')
     end
 
-    project = Project.new(name: name, slug: slug)
+    project = Project.new(title: name, slug: slug)
     if project.save
-      Membership.create(user: current_user, project: project, role: :owner)
-      respond_with :message, text: t('commands.projects.create.success', name: project.name, slug: project.slug)
+      Membership.create!(user: current_user, project: project, role: :owner)
+      respond_with :message, text: t('commands.projects.create.success', title: project.title, slug: project.slug)
       show_projects_list
     else
       respond_with :message, text: t('commands.projects.create.error', reason: project.errors.full_messages.join(', '))
@@ -179,9 +155,9 @@ class ProjectsCommand < BaseCommand
     project = current_user.projects.find_by(slug: current_slug)
     return show_projects_list unless project
 
-    old_name = project.name
-    text = if project.update(name: new_title)
-             t('commands.projects.rename.success_title', old_name: old_name, new_name: new_title)
+    old_title = project.title
+    text = if project.update(title: new_title)
+             t('commands.projects.rename.success_title', old_title: old_title, new_title: new_title)
            else
              t('commands.projects.rename.error')
            end
@@ -329,17 +305,17 @@ class ProjectsCommand < BaseCommand
     return show_projects_list unless project
 
     # Проверяем что пользователь ввел название проекта
-    if confirmation != project.name
-      respond_with :message, text: t('commands.projects.delete.name_mismatch')
+    if confirmation != project.title
+      respond_with :message, text: t('commands.projects.delete.title_mismatch')
       show_project_menu(current_slug)
       return
     end
 
     # Удаляем проект
-    project_name = project.name
+    project_title = project.title
     project.destroy
     session.delete(:current_project_slug)
-    respond_with :message, text: t('commands.projects.delete.success', name: project_name)
+    respond_with :message, text: t('commands.projects.delete.success', title: project_title)
     show_projects_list
   end
 
@@ -407,7 +383,7 @@ class ProjectsCommand < BaseCommand
 
     client_text = project.client&.name || t('commands.projects.menu.no_client')
     menu_text = t('commands.projects.menu.title',
-                  name: project.name,
+                  title: project.title,
                   slug: project.slug,
                   client: client_text)
 
@@ -435,7 +411,7 @@ class ProjectsCommand < BaseCommand
     project = current_user.projects.find_by(slug: slug)
     return show_projects_list unless project&.can_be_managed_by?(current_user)
 
-    menu_text = t('commands.projects.rename.title', name: project.name)
+    menu_text = t('commands.projects.rename.menu_title', title: project.title)
     buttons = [
       [{ text: t('commands.projects.rename.title_button'), callback_data: "projects_rename_title:#{slug}" }],
       [{ text: t('commands.projects.rename.slug_button'), callback_data: "projects_rename_slug:#{slug}" }],
@@ -457,7 +433,7 @@ class ProjectsCommand < BaseCommand
     save_context(CONTEXT_AWAITING_RENAME_TITLE)
 
     text = t('commands.projects.rename.enter_title',
-             current_name: project.name)
+             current_title: project.title)
     respond_with :message, text: text
   end
 
@@ -481,7 +457,7 @@ class ProjectsCommand < BaseCommand
     save_context(CONTEXT_AWAITING_RENAME_BOTH)
 
     text = t('commands.projects.rename.enter_title',
-             current_name: project.name)
+             current_title: project.title)
     respond_with :message, text: text
   end
 
@@ -528,7 +504,7 @@ class ProjectsCommand < BaseCommand
     stats = project.deletion_stats
 
     text = t('commands.projects.delete.confirm_first',
-             name: project.name,
+             title: project.title,
              time_shifts: stats[:time_shifts_count],
              memberships: stats[:memberships_count],
              invites: stats[:invites_count])
@@ -552,7 +528,7 @@ class ProjectsCommand < BaseCommand
     save_context(CONTEXT_AWAITING_DELETE_CONFIRM)
 
     text = t('commands.projects.delete.confirm_final',
-             name: project.name)
+             title: project.title)
     respond_with :message, text: text
   end
 
@@ -562,7 +538,7 @@ class ProjectsCommand < BaseCommand
 
     current_client = project.client&.name || t('commands.projects.menu.no_client')
     text = t('commands.projects.client.menu_title',
-             project_name: project.name,
+             project_title: project.title,
              client_name: current_client)
 
     buttons = [
@@ -585,10 +561,10 @@ class ProjectsCommand < BaseCommand
     return show_projects_list unless project&.can_be_managed_by?(current_user)
 
     # Получаем новое название из session (должно быть сохранено перед этим)
-    new_name = session[:new_project_title]
-    return show_projects_list unless new_name
+    new_title = session[:new_project_title]
+    return show_projects_list unless new_title
 
-    update_project_both(project, new_name, suggested_slug)
+    update_project_both(project, new_title, suggested_slug)
   end
 
   def handle_legacy_create_format(args)
@@ -619,11 +595,11 @@ class ProjectsCommand < BaseCommand
     return respond_with :message, text: t('commands.projects.rename.slug_taken', slug: slug) if Project.exists?(slug: slug)
 
     # Для совместимости со старым форматом
-    project = Project.new(name: slug, slug: slug)
+    project = Project.new(title: slug, slug: slug)
     if project.save
-      Membership.create(user: current_user, project: project, role: :owner)
+      Membership.create!(user: current_user, project: project, role: :owner)
       respond_with :message, text: t('commands.projects.create.success',
-                                     name: project.name,
+                                     title: project.title,
                                      slug: project.slug)
     else
       respond_with :message, text: t('commands.projects.create.error',
@@ -631,7 +607,7 @@ class ProjectsCommand < BaseCommand
     end
   end
 
-  def update_project_both(project, new_name, new_slug)
+  def update_project_both(project, new_title, new_slug)
     # Валидация нового slug
     return show_error_message(t('commands.projects.rename.slug_invalid')) if invalid_slug?(new_slug)
 
@@ -640,18 +616,18 @@ class ProjectsCommand < BaseCommand
       return show_error_message(t('commands.projects.rename.slug_taken', slug: new_slug))
     end
 
-    old_name = project.name
+    old_title = project.title
     old_slug = project.slug
 
-    if project.update(name: new_name, slug: new_slug)
+    if project.update(title: new_title, slug: new_slug)
       # Очистка session
       session.delete(:current_project_slug)
       session.delete(:new_project_title)
       session.delete(:suggested_slug)
 
       text = t('commands.projects.rename.success_both',
-               old_name: old_name,
-               new_name: new_name,
+               old_title: old_title,
+               new_title: new_title,
                old_slug: old_slug,
                new_slug: new_slug)
       respond_with :message, text: text
@@ -675,6 +651,11 @@ class ProjectsCommand < BaseCommand
 
   def show_error_message(message)
     respond_with :message, text: message
+  end
+
+  def handle_missing_callback_data(callback_name)
+    Bugsnag.notify(RuntimeError.new("#{callback_name}_callback_query called without data"))
+    respond_with :message, text: t('commands.projects.unknown_action')
   end
 
   def invalid_slug?(slug)
