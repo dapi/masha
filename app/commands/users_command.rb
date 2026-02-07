@@ -145,9 +145,9 @@ class UsersCommand < BaseCommand
 
   def users_add_username_input(username, *)
     username = username.delete_prefix('@') if username.start_with?('@')
-    tg_session = telegram_session
+    tg_session = controller.telegram_session
     tg_session[:username] = username
-    self.telegram_session = tg_session
+    controller.telegram_session = tg_session
 
     respond_with :message,
                  text: "Пользователь: @#{username}\nВыберите роль для пользователя:",
@@ -181,7 +181,7 @@ class UsersCommand < BaseCommand
       return
     end
 
-    self.telegram_session = TelegramSession.users_add_user(project_slug: project_slug)
+    controller.telegram_session = TelegramSession.users_add_user(project_slug: project_slug)
     save_context :users_add_username_input
     edit_message :text, text: "Проект: #{project.slug}\nТеперь введите никнейм пользователя (например: @username или username):"
     safe_answer_callback_query('✅ Проект выбран')
@@ -195,12 +195,12 @@ class UsersCommand < BaseCommand
 
     safe_answer_callback_query('✅ Роль выбрана')
 
-    data = telegram_session_data
+    data = controller.telegram_session_data
     project_slug = data['project_slug']
     username = data['username']
 
     # Clean up session
-    clear_telegram_session
+    controller.clear_telegram_session
 
     edit_message :text, text: "Добавляем пользователя @#{username} в проект #{project_slug} с ролью #{role}..."
 
