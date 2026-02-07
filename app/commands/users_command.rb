@@ -5,7 +5,9 @@ class UsersCommand < BaseCommand
 
   def call(action = nil, *)
     case action
-    when nil, 'list'
+    when nil, 'help'
+      show_users_help
+    when 'projects', 'list'
       show_project_users
     when 'all'
       show_all_users
@@ -13,10 +15,8 @@ class UsersCommand < BaseCommand
       users_add(*)
     when 'remove'
       users_remove(*)
-    when 'help'
-      show_users_help
     else
-      respond_with :message, text: 'Неизвестная подкоманда. Используйте /users help для подсказки'
+      respond_with :message, text: 'Неизвестная подкоманда. Используйте /users для подсказки'
     end
   end
 
@@ -48,9 +48,9 @@ class UsersCommand < BaseCommand
     return respond_with :message, text: 'Эта команда доступна только разработчику системы' unless developer?
 
     # Для разработчика current_user может быть nil, это нормально
-    users_text = User.includes(:telegram_user, :projects)
-                     .map { |user| format_user_info(user) }
-                     .join("\n\n")
+    # Загружаем все проекты для каждого пользователя, чтобы отфильтровать active в памяти
+    users = User.includes(:telegram_user, :projects).all
+    users_text = users.map { |user| format_user_info(user) }.join("\n\n")
 
     respond_with :message, text: users_text.presence || 'Пользователи не найдены', parse_mode: :Markdown
   end
@@ -76,11 +76,11 @@ class UsersCommand < BaseCommand
   def show_users_help
     help_text = <<~HELP
       *Управление пользователями:*
-      /users - Показать пользователей текущего проекта
+      /users - Эта подсказка
+      /users projects - Показать пользователей проекта
       /users all - Показать всех пользователей (только для разработчика)
       /users add {project} {username} [role] - Добавить пользователя в проект
       /users remove {project} {username} - Удалить пользователя из проекта
-      /users help - Эта подсказка
 
       *Роли пользователей:*
       owner - владелец проекта
@@ -130,7 +130,9 @@ class UsersCommand < BaseCommand
 
   def format_user_info(user)
     telegram_info = user.telegram_user ? "(@#{user.telegram_user.username})" : ''
-    projects_info = user.projects.alive.any? ? "Проекты: #{user.projects.alive.map(&:slug).join(', ')}" : ''
+    # Фильтруем активные проекты в памяти, чтобы не делать дополнительные SQL-запросы
+    alive_projects = user.projects.select(&:active?)
+    projects_info = alive_projects.any? ? "Проекты: #{alive_projects.map(&:slug).join(', ')}" : ''
     "*#{user.name || user.email}*#{telegram_info}\n#{projects_info}"
   end
 
