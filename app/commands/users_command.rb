@@ -92,7 +92,7 @@ class UsersCommand < BaseCommand
   end
 
   def show_users_for_project(project)
-    memberships = project.memberships.includes(:user, :telegram_user).order(:role_cd, :created_at)
+    memberships = project.memberships.includes(user: :telegram_user).order(:role_cd, :created_at)
 
     if memberships.empty?
       respond_with :message, text: "В проекте '#{project.slug}' нет пользователей"
