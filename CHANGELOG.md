@@ -4,6 +4,28 @@
 
 ---
 
+## Что нового в v0.19.2
+
+### 🎯 Основные изменения с версии v0.19.1
+
+#### 🐛 Исправления
+🐛 add auth check in UsersCommand callback queries
+🐛 address code review issues
+🐛 исправления по ревью PR #329
+#### 🔧 Улучшения
+🔧 Refactor projects
+🔧 Refactor ProjectsCommand: migrate to session-based state management
+🔧 rename name to title in Project model
+### 📊 Статистика релиза
+
+- **Всего изменений:** 19 коммитов
+- **Исправлений:** 3
+
+---
+🤖 *Changelog сгенерирован автоматически для MashTime Bot*
+
+
+
 ## Что нового в v0.19.1
 
 ### 🎯 Основные изменения с версии v0.19.0
