@@ -4,6 +4,32 @@
 
 ---
 
+## Что нового в v0.19.1
+
+### 🎯 Основные изменения с версии v0.19.0
+
+#### ✨ Новый функционал
+✨ show help by default for /report command (#353) (#356)
+#### 🐛 Исправления
+🐛 add auth check in UsersCommand callback queries
+🐛 address code review issues
+🐛 show error instead of silent fallback for invalid /report args (#354)
+🐛 исправления по ревью PR #329
+#### 🔧 Улучшения
+🔧 Refactor projects
+🔧 Refactor ProjectsCommand: migrate to session-based state management
+🔧 rename name to title in Project model
+### 📊 Статистика релиза
+
+- **Всего изменений:** 22 коммитов
+- **Новых возможностей:** 1
+- **Исправлений:** 4
+
+---
+🤖 *Changelog сгенерирован автоматически для MashTime Bot*
+
+
+
 ## Что нового в v0.19.0
 
 ### 🎯 Основные изменения с версии v0.18.0
