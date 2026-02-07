@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2026_02_07_063828) do
+ActiveRecord::Schema[8.0].define(version: 2026_02_07_070824) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -117,7 +117,7 @@ ActiveRecord::Schema[8.0].define(version: 2026_02_07_063828) do
     t.boolean "active", default: true, null: false
     t.integer "telegram_chat_id"
     t.bigint "client_id"
-    t.string "title"
+    t.string "title", null: false
     t.index ["client_id"], name: "index_projects_on_client_id"
     t.index ["slug"], name: "index_projects_on_slug", unique: true
   end

@@ -326,23 +326,26 @@ class ProjectsCommand < BaseCommand
   end
 
   def handle_cancel_input(context_type)
+    current_slug = session[:current_project_slug]
+    clear_session_data
+
     case context_type
     when :rename_title, :rename_slug, :rename_both
-      current_slug = session[:current_project_slug]
-      session.delete(:current_project_slug)
       respond_with :message, text: t('commands.projects.rename.cancelled')
       show_project_menu(current_slug)
     when :client_name, :client_delete
-      current_slug = session[:current_project_slug]
-      session.delete(:current_project_slug)
       respond_with :message, text: t('commands.projects.client.cancelled')
       show_client_menu(current_slug)
     when :delete
-      current_slug = session[:current_project_slug]
-      session.delete(:current_project_slug)
       respond_with :message, text: t('commands.projects.delete.cancelled')
       show_project_menu(current_slug)
     end
+  end
+
+  def clear_session_data
+    session.delete(:current_project_slug)
+    session.delete(:new_project_title)
+    session.delete(:suggested_slug)
   end
 
   def show_projects_list
@@ -620,10 +623,7 @@ class ProjectsCommand < BaseCommand
     old_slug = project.slug
 
     if project.update(title: new_title, slug: new_slug)
-      # Очистка session
-      session.delete(:current_project_slug)
-      session.delete(:new_project_title)
-      session.delete(:suggested_slug)
+      clear_session_data
 
       text = t('commands.projects.rename.success_both',
                old_title: old_title,
