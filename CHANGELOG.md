@@ -4,6 +4,33 @@
 
 ---
 
+## Что нового в v0.22.1
+
+### 🎯 Основные изменения с версии v0.21.0
+
+#### ✨ Новый функционал
+✨ Add build-and-push and deploy steps to release targets
+#### 🐛 Исправления
+🐛 Fix AssociationNotFoundError in UsersCommand
+🐛 Refactor UsersCommand: change default action to help and fix N+1 query
+---
+🤖 *Changelog сгенерирован автоматически для MashTime Bot*
+
+
+
+## Что нового в v0.22.1
+
+### 🎯 Основные изменения с версии v0.21.0
+
+#### ✨ Новый функционал
+✨ Add build-and-push and deploy steps to release targets
+#### 🐛 Исправления
+🐛 Fix AssociationNotFoundError in UsersCommand
+---
+🤖 *Changelog сгенерирован автоматически для MashTime Bot*
+
+
+
 ## Что нового в v0.22.0
 
 ### 🎯 Первые изменения проекта
