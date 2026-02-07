@@ -26,6 +26,7 @@ class Project < ApplicationRecord
   scope :archive, -> { where(active: false) }
   scope :alphabetically, -> { order(slug: :asc) }
 
+  validates :title, presence: true
   validates :slug, presence: true, uniqueness: true,
                    format: { with: /\A[a-z0-9._+-]+\Z/, message: :invalid_slug_format }
   validate :slug_not_reserved
