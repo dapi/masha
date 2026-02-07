@@ -21,17 +21,11 @@ class UsersCommand < BaseCommand
   end
 
   def show_project_users
-    if current_user.nil?
-      respond_with :message, text: t('errors.auth_required')
-      return
-    end
+    return respond_with :message, text: t('errors.auth_required') if current_user.nil?
 
     projects = current_user.available_projects.alive
 
-    if projects.empty?
-      respond_with :message, text: 'У вас нет доступных проектов'
-      return
-    end
+    return respond_with :message, text: 'У вас нет доступных проектов' if projects.empty?
 
     if projects.one?
       show_users_for_project(projects.first)
@@ -56,10 +50,7 @@ class UsersCommand < BaseCommand
   end
 
   def users_add(project_slug = nil, username = nil, role = 'member', *)
-    if current_user.nil?
-      respond_with :message, text: t('errors.auth_required')
-      return
-    end
+    return respond_with :message, text: t('errors.auth_required') if current_user.nil?
 
     return show_manageable_projects_for_add if project_slug.blank?
 
@@ -94,10 +85,7 @@ class UsersCommand < BaseCommand
   def show_users_for_project(project)
     memberships = project.memberships.includes(user: :telegram_user).order(:role_cd, :created_at)
 
-    if memberships.empty?
-      respond_with :message, text: "В проекте '#{project.slug}' нет пользователей"
-      return
-    end
+    return respond_with :message, text: "В проекте '#{project.slug}' нет пользователей" if memberships.empty?
 
     users_text = memberships.map do |membership|
       user = membership.user
