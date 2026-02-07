@@ -133,7 +133,9 @@ class UsersCommand < BaseCommand
     # Фильтруем активные проекты в памяти, чтобы не делать дополнительные SQL-запросы
     alive_projects = user.projects.select(&:active?)
     projects_info = alive_projects.any? ? "Проекты: #{alive_projects.map(&:slug).join(', ')}" : ''
-    "*#{user.name || user.email}*#{telegram_info}\n#{projects_info}"
+    # Экранируем Markdown-символы в имени пользователя
+    display_name = escape_markdown(user.name.presence || user.email)
+    "*#{display_name}*#{telegram_info}\n#{projects_info}"
   end
 
   # Context methods for interactive add user workflow (must be public)

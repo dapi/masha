@@ -10,4 +10,11 @@ module FormatHelpers
   def code(text)
     multiline '```', text, '```'
   end
+
+  # Экранирование специальных символов Telegram Markdown
+  def escape_markdown(text)
+    return '' if text.blank?
+
+    text.to_s.gsub(/([*_`\[\]])/, '\\\\\1')
+  end
 end
