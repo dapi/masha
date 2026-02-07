@@ -4,6 +4,37 @@
 
 ---
 
+## Что нового в v0.22.0
+
+### 🎯 Первые изменения проекта
+
+#### ✨ Новый функционал
+✨ Add build-and-push and deploy steps to release targets
+✨ Add build-and-push and deploy targets to Makefile
+✨ Add extra tests
+✨ Separate CI/CD workflows for linting and security
+✨ show help by default for /report command (#353) (#356)
+#### 🐛 Исправления
+🐛 add auth check in UsersCommand callback queries
+🐛 address code review issues
+🐛 Fix AssociationNotFoundError in UsersCommand
+🐛 Fix .claude
+🐛 fix /rate
+#### 🔧 Улучшения
+🔧 Improve /add
+🔧 Refactor projects
+🔧 Refactor ProjectsCommand: migrate to session-based state management
+### 📊 Статистика релиза
+
+- **Всего изменений:** 49 коммитов
+- **Новых возможностей:** 5
+- **Исправлений:** 9
+
+---
+🤖 *Changelog сгенерирован автоматически для MashTime Bot*
+
+
+
 ## Что нового в v0.20.0
 
 ### 🎯 Основные изменения с версии v0.19.2
