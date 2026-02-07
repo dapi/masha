@@ -38,8 +38,8 @@ patch:
 bump-patch: patch
 bump-minor: minor
 
-patch-release: generate-changelog bump-patch-with-changelog
-minor-release: bump-minor-with-changelog
+patch-release: generate-changelog bump-patch-with-changelog build-and-push deploy
+minor-release: generate-changelog bump-minor-with-changelog build-and-push deploy
 
 # Генерирует changelog (без коммита)
 generate-changelog:
