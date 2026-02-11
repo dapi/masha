@@ -52,7 +52,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
       let(:telegram_user) { telegram_users(:telegram_regular) }
       let(:from_id) { telegram_user.id }
       let(:other_user) { users(:regular_user) }
-      let(:other_project) { projects(:dev_project) }
+      let(:other_project) { projects(:other_owner_project) }
 
       include_context 'authenticated user'
 

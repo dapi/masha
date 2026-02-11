@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
 gem 'puma'
 
@@ -204,6 +204,7 @@ gem 'anyway_config', '~> 2.7'
 gem 'drb', '~> 2.2'
 
 gem 'brakeman', '~> 7.1'
+gem 'bundler-audit', require: false
 # Use the database-backed adapters for Rails.cache, Active Job, and Action Cable
 gem 'solid_cable'
 gem 'solid_cache'

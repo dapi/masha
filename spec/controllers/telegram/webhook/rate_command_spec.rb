@@ -420,50 +420,40 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
     end
 
     context 'access control' do
-      let(:non_owner_user) { users(:project_member) }
-      let(:non_owner_telegram) { telegram_users(:telegram_member) }
-      let(:non_owner_project) { projects(:dev_project) }
-
-      before do
-        # Override user context to non-owner
-        allow(controller).to receive(:from).and_return({ 'id' => non_owner_telegram.id })
-      end
+      # user_with_telegram является participant (не owner) для test_project
+      # Это позволяет тестировать что participant не может управлять ставками
+      let(:participant_project) { projects(:test_project) }
 
       it 'prevents non-owner from managing rates' do
+        # user_with_telegram является participant для test_project (role_cd: 2)
         response = dispatch(callback_query: {
                               id: 'test_callback',
-                              from: { 'id' => non_owner_telegram.id },
+                              from: from,
                               message: { message_id: 22, chat: chat },
-                              data: "rate_select_project:#{non_owner_project.slug}"
+                              data: "rate_select_project:#{participant_project.slug}"
                             })
 
         expect(response).not_to be_nil
 
-        # Проверяем, что non-owner получает сообщение об ошибке
+        # Проверяем, что participant получает сообщение об ошибке доступа
         first_message = response.first
-        # Может быть либо "Проект не найден" (если не имеет доступа), либо "Нет доступа"
-        expect(first_message[:text]).to(satisfy do |text|
-          text.include?('Проект') && (text.include?('не найден') || text.include?('Нет доступа'))
-        end)
+        expect(first_message[:text]).to include(I18n.t('telegram.commands.rate.access_denied_owner_only'))
       end
 
       it 'handles unauthorized access gracefully when trying to set rates' do
-        # Пытаемся установить ставку от имени не-владельца
+        # Пытаемся установить ставку в проекте где user participant (не owner)
         response = dispatch(callback_query: {
                               id: 'test_callback',
-                              from: { 'id' => non_owner_telegram.id },
+                              from: from,
                               message: { message_id: 22, chat: chat },
-                              data: "rate_set_rate:#{non_owner_project.slug}"
+                              data: "rate_set_rate:#{participant_project.slug}"
                             })
 
         expect(response).not_to be_nil
 
         # Проверяем, что возвращается сообщение об ошибке
         first_message = response.first
-        # Может быть либо "Проект не найден" (если не имеет доступа), либо "Нет доступа"
-        expect(first_message[:text]).to(satisfy do |text|
-          text.include?('Проект') && (text.include?('не найден') || text.include?('Нет доступа'))
-        end)
+        expect(first_message[:text]).to include(I18n.t('telegram.commands.rate.access_denied_owner_only'))
       end
     end
 

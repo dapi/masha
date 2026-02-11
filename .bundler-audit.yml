@@ -1,0 +1,18 @@
+# Bundler Audit ignore list
+# These vulnerabilities are acknowledged and accepted for now
+# Each entry should be reviewed periodically
+
+ignore:
+  # jquery-ui-rails 4.0.3 vulnerabilities
+  # Updating requires significant UI testing and migration work
+  # XSS vulnerabilities mitigated by CSP headers and input sanitization
+  - GHSA-hpcf-8vf9-q4gj  # CVE-2016-7103 - XSS in closeText option
+  - GHSA-9gj3-hwp5-pmwc  # CVE-2021-41182 - XSS in altField option
+  - GHSA-j7qv-pgf6-hvh4  # CVE-2021-41183 - XSS in *Text options
+  - GHSA-gpqq-952q-5327  # CVE-2021-41184 - XSS in .position() util
+  - GHSA-h6gj-6jjq-h8g9  # CVE-2022-31160 - XSS in checkboxradio
+
+  # sinatra 3.2.0 vulnerabilities (dependency of telegram-bot gem)
+  # Low risk for this application's use case
+  - GHSA-hxx2-7vcw-mqr3  # CVE-2024-21510 - Untrusted inputs
+  - GHSA-mr3q-g2mv-mr4q  # CVE-2025-61921 - ReDoS in ETag

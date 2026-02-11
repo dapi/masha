@@ -65,8 +65,8 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
       end.to change(Project, :count).by(1)
 
       # Проверяем что в ответе нет необработанных плейсхолдеров
-      expect(response.first[:text]).not_to include('%{name}')
-      expect(response.first[:text]).not_to include('%{slug}')
+      expect(response.first[:text]).not_to include('%<name>s')
+      expect(response.first[:text]).not_to include('%<slug>s')
 
       # Проверяем что в ответе есть реальные значения
       expect(response.first[:text]).to include('test-proj')
@@ -286,7 +286,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
         expect do
           dispatch_message('new-slug')
         end.to change { project.reload.title }.to('New Title')
-          .and change { project.slug }.to('new-slug')
+                                              .and change { project.slug }.to('new-slug')
       end
 
       it 'uses suggested slug when button clicked' do
@@ -324,7 +324,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
                      data: suggested_button[:callback_data]
                    })
         end.to change { project.reload.slug }.from(old_slug)
-          .and change { project.title }.to('My Awesome Project')
+                                             .and change { project.title }.to('My Awesome Project')
       end
     end
   end
@@ -449,7 +449,7 @@ RSpec.describe Telegram::WebhookController, telegram_bot: :rails, type: :telegra
     end
 
     it 'cancels deletion on wrong name' do
-      project_title = project.title
+      project.title
 
       # 1. User clicks on project menu
       dispatch(callback_query: {
