@@ -97,7 +97,7 @@ jobs:
         run: echo "tag=$DOCKER_METADATA_OUTPUT_VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Scan for vulnerabilities
-        uses: crazy-max/ghaction-container-scan@v3
+        uses: crazy-max/ghaction-container-scan@v4
         id: scan
         with:
           image: ${{ steps.build.outputs.imageid }}
