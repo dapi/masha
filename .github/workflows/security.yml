@@ -29,7 +29,7 @@ jobs:
       run: make security
 
     - name: Upload Brakeman report
-      uses: actions/upload-artifact@v6
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: brakeman-report
