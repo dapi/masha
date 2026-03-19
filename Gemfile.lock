@@ -113,7 +113,7 @@ GEM
       beautiful-log
     awesome_print (1.8.0)
     base64 (0.3.0)
-    bcrypt (3.1.20)
+    bcrypt (3.1.22)
     beautiful-log (0.2.2)
       awesome_print (~> 1.8.0)
       colorize (~> 0.8.1)
