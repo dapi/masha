@@ -173,7 +173,7 @@ GEM
     cssbundling-rails (1.4.3)
       railties (>= 6.0.0)
     csv (3.3.5)
-    date (3.5.0)
+    date (3.5.1)
     debug_inspector (1.2.0)
     diff-lcs (1.6.2)
     dip (8.1.0)
@@ -415,7 +415,7 @@ GEM
     mutex_m (0.3.0)
     nanoid (2.0.0)
     nenv (0.3.0)
-    net-imap (0.5.12)
+    net-imap (0.5.14)
       date
       net-protocol
     net-pop (0.1.2)
@@ -711,7 +711,7 @@ GEM
     thruster (0.1.16-x86_64-linux)
     tilt (2.6.1)
     timeliness (0.5.3)
-    timeout (0.4.4)
+    timeout (0.6.1)
     tsort (0.2.0)
     turbolinks (5.2.1)
       turbolinks-source (~> 5.2)
